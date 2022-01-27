@@ -103,17 +103,6 @@ static __weak GenPlusGameCore *_current;
 
 - (id)init
 {
-    
-    CGDirectDisplayID displays;
-    uint32_t matchingDisplayCount = 1;
-    CGGetDisplaysWithRect([[NSApp mainWindow]frame], 1, &displays, &matchingDisplayCount);
-    double monitorRefreshRate = CGDisplayModeGetRefreshRate(CGDisplayCopyDisplayMode(displays));
-    if (fabs(monitorRefreshRate - ntsc_fps) <= 1) {
-        ntsc_fps = monitorRefreshRate;
-    } else if (fabs(monitorRefreshRate - pal_fps) <= 1) {
-        pal_fps = monitorRefreshRate;
-    }
-    
     if((self = [super init]))
     {
         videoBuffer = (uint32_t*)malloc(720 * 576 * 4);
@@ -136,6 +125,16 @@ static __weak GenPlusGameCore *_current;
 
 - (BOOL)loadFileAtPath:(NSString *)path error:(NSError **)error
 {
+    CGDirectDisplayID displays;
+    uint32_t matchingDisplayCount = 1;
+    CGGetDisplaysWithRect([[NSApp mainWindow]frame], 1, &displays, &matchingDisplayCount);
+    double monitorRefreshRate = CGDisplayModeGetRefreshRate(CGDisplayCopyDisplayMode(displays));
+    if (fabs(monitorRefreshRate - ntsc_fps) < 1) {
+        ntsc_fps = monitorRefreshRate;
+    } else if (fabs(monitorRefreshRate - pal_fps) < 1) {
+        pal_fps = monitorRefreshRate;
+    }
+    
     _romFile = [NSURL fileURLWithPath:path];
 
     // Set CD BIOS and BRAM/RAM Cart paths
