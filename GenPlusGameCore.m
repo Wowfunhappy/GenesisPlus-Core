@@ -33,9 +33,8 @@
 #include "shared.h"
 #include "scrc32.h"
 
-static const double pal_fps = 53203424.0 / (3420.0 * 313.0);
-//static const double ntsc_fps = 53693175.0 / (3420.0 * 262.0);
-static const double ntsc_fps = 60;
+double pal_fps = 53203424.0 / (3420.0 * 313.0);
+double ntsc_fps = 53693175.0 / (3420.0 * 262.0);
 
 char GG_ROM[256];
 char AR_ROM[256];
@@ -104,6 +103,17 @@ static __weak GenPlusGameCore *_current;
 
 - (id)init
 {
+    
+    CGDirectDisplayID displays;
+    uint32_t matchingDisplayCount = 1;
+    CGGetDisplaysWithRect([[NSApp mainWindow]frame], 1, &displays, &matchingDisplayCount);
+    double monitorRefreshRate = CGDisplayModeGetRefreshRate(CGDisplayCopyDisplayMode(displays));
+    if (fabs(monitorRefreshRate - ntsc_fps) <= 1) {
+        ntsc_fps = monitorRefreshRate;
+    } else if (fabs(monitorRefreshRate - pal_fps) <= 1) {
+        pal_fps = monitorRefreshRate;
+    }
+    
     if((self = [super init]))
     {
         videoBuffer = (uint32_t*)malloc(720 * 576 * 4);
